@@ -111,7 +111,7 @@ def _write_readme(out_dir, stem, cfg, act, report):
         for n in report["filament_g"])
     md = f"""# {cfg.title or f['sport']} · {cfg.shape} 地形纪念牌
 
-由 `{os.path.basename(stem)}` 自动生成（fitrelief）。
+由 `{os.path.basename(stem)}` 自动生成（fitscape）。
 
 ![预览](renders/contact.png)
 

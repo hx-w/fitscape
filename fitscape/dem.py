@@ -55,7 +55,7 @@ def fetch(lon_min, lat_min, lon_max, lat_max, zoom=14, cache="build/tiles", max_
     os.makedirs(cache, exist_ok=True)
     zoom, tx0, tx1, ty0, ty1 = choose_zoom(lon_min, lat_min, lon_max, lat_max, zoom, max_px)
     nx, ny = tx1 - tx0 + 1, ty1 - ty0 + 1
-    s = requests.Session(); s.headers.update({"User-Agent": "fitrelief/1.0"})
+    s = requests.Session(); s.headers.update({"User-Agent": "fitscape/1.0"})
     mosaic = np.zeros((ny*256, nx*256, 3))
     for j, ty in enumerate(range(ty0, ty1+1)):
         for i, tx in enumerate(range(tx0, tx1+1)):

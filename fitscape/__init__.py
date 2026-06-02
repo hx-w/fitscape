@@ -1,4 +1,4 @@
-"""fitrelief — turn a Garmin FIT activity into a 3D-printable terrain relief tile."""
+"""fitscape — turn a Garmin FIT activity into a 3D-printable terrain relief tile."""
 from .config import TileConfig, auto_labels, load_yaml, merge
 from .pipeline import build_tile
 

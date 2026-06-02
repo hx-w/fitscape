@@ -1,4 +1,4 @@
-# fit-3d · fitrelief
+# fitscape
 
 **把一份 Garmin/FIT 运动记录变成一块可直接 3D 打印的地形浮雕纪念牌。**
 Turn any Garmin `.fit` activity into a 3D-printable terrain-relief medallion — real terrain,
@@ -84,7 +84,7 @@ labels:
 `{ascent_arrow}` `{descent}` `{date}` `{date_dash}` `{date_cn}` `{duration}` `{duration_hms}`
 `{pace}` `{hr}` `{hr_heart}` `{maxhr}` `{maxhr_heart}` `{calories}` `{kcal}` `{speed_kmh}` `{elev_max}` `{sport}`
 
-## ⚙️ 主要可配置项（`fitrelief/config.py`，YAML 全可覆盖）
+## ⚙️ 主要可配置项（`fitscape/config.py`，YAML 全可覆盖）
 
 - **外形**：`shape` `across_mm` `frame_width` `frame_chamfer` `frame_rim_margin`
 - **立体**：`base_h` `exaggeration`
@@ -101,7 +101,7 @@ labels:
 平躺、底面贴板、**无需支撑**（地形是高度场）→ 层高 0.16 mm、填充 10–15%。
 也可单色：只用 `stl/terrain.stl`（已含路线凹槽）。每个产物目录都有专属 `README.md`。
 
-## 🧱 架构（`fitrelief/`）
+## 🧱 架构（`fitscape/`）
 
 | 模块 | 职责 |
 |---|---|
@@ -116,7 +116,7 @@ labels:
 
 ## 🔤 字体
 
-CJK 标题默认用 macOS 的 `Hiragino Sans GB` / `STHeiti`。其它系统在 `fitrelief/text3d.py` 的 `FONTS`
+CJK 标题默认用 macOS 的 `Hiragino Sans GB` / `STHeiti`。其它系统在 `fitscape/text3d.py` 的 `FONTS`
 里换成本机字体路径（如思源黑体 `SourceHanSansSC`），或在 config 用 `font_title` / `font_stat` 指定。
 
 ## 📄 License

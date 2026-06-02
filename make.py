@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fitrelief CLI — turn FIT files in resources/ into printable relief tiles.
+"""fitscape CLI — turn FIT files in resources/ into printable relief tiles.
 
 Examples:
   python make.py resources/600371130_ACTIVITY.fit --title 雄鹰线
@@ -8,7 +8,7 @@ Examples:
   python make.py xxx.fit --preset square_modern --config configs/xxx.yaml
 """
 import argparse, glob, os, sys
-from fitrelief import TileConfig, load_yaml, merge, build_tile
+from fitscape import TileConfig, load_yaml, merge, build_tile
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PRESETS = os.path.join(ROOT, "presets")

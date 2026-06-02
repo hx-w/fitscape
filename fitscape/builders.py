@@ -142,7 +142,7 @@ def build_labels(activity, shape, cfg, frame_info):
         fac = min(1.0, avail_w / max(w, 1e-6), avail_h / max(h, 1e-6))
         if fac < 0.995:                                    # auto-shrink to fit the slot
             h *= fac
-            print(f"[fitrelief] label {text!r} shrunk to {h:.1f}mm to fit slot '{slot.name}'")
+            print(f"[fitscape] label {text!r} shrunk to {h:.1f}mm to fit slot '{slot.name}'")
             man = text_manifold(text, font, height_mm=cfg.text_raise, target_h_mm=h, embolden=emb)
             bb = man.bounding_box()
         cx, cy = (bb[0]+bb[3])/2, (bb[1]+bb[4])/2
