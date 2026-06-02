@@ -2,6 +2,12 @@
 output/
 .demcache/
 
+# private activity data — deny-by-default so no personal .fit/config leaks.
+# Only the shared running-sample is whitelisted; your own activities stay local.
+resources/*.fit
+!resources/600371130_ACTIVITY.fit
+configs/*.yaml
+
 # python
 __pycache__/
 *.py[cod]

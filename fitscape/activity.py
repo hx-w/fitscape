@@ -5,7 +5,7 @@ strings ready for label templating. Drop a new .fit in resources/ and every
 """
 import math
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import timedelta
 import numpy as np
 import fitdecode
 
@@ -122,13 +122,13 @@ def parse(fit_path, utc_offset_hours=None):
         "date_cn": start_local.strftime("%Y年%m月%d日"),
         "duration": _fmt_duration(dur_s),
         "duration_hms": f"{int(dur_s//3600)}:{int(dur_s%3600//60):02d}:{int(dur_s%60):02d}",
-        "pace": _fmt_pace(pace),
+        "pace": _fmt_pace(pace) if math.isfinite(pace) and pace > 0 else "",
         "hr": f"{int(avg_hr)}" if avg_hr else "",
         "hr_heart": f"♥{int(avg_hr)}" if avg_hr else "",
         "maxhr": f"{int(max_hr)}" if max_hr else "",
         "maxhr_heart": f"♥{int(max_hr)}" if max_hr else "",
         "calories": f"{int(cal)}" if cal else "", "kcal": f"{int(cal)}kcal" if cal else "",
-        "speed_kmh": f"{(stats['avg_speed'] or 0)*3.6:.1f}km/h",
+        "speed_kmh": f"{stats['avg_speed']*3.6:.1f}km/h" if stats['avg_speed'] else "",
         "elev_max": f"{int(round(stats['elev_max']))}m",
         "sport": sport_cn,
     }

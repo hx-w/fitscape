@@ -7,7 +7,6 @@ string over the activity's stat dict (e.g. "{distance}", "♥{hr}", or a literal
 """
 import math
 from dataclasses import dataclass, field, asdict, fields
-import numpy as np
 import yaml
 
 
@@ -30,7 +29,8 @@ class TileConfig:
     dem_margin: float = 0.35          # extra geo margin fetched around route bbox
     route_safe_mm: float = 6.0
     elev_floor_pct: float = 2.0
-    # route bead
+    # route
+    route_style: str = "bead"         # "bead" (tube on terrain) | "ribbon" (speed wall)
     route_encode: str = "height"      # "height" | "uniform"
     route_metric: str = "speed"       # "speed" | "hr" | "grade"
     route_invert: bool = False        # invert so fast = tall
@@ -41,6 +41,12 @@ class TileConfig:
     route_embed: float = 0.45
     route_resample_mm: float = 1.2
     speed_smooth_s: float = 25.0
+    # ribbon style — expressive for flat rides: a wall whose height encodes a metric
+    ribbon_thick: float = 1.8
+    ribbon_h_min: float = 1.6
+    ribbon_h_max: float = 12.0
+    ribbon_metric: str = "speed"      # "speed"|"hr"|"grade"|"elevation" (tall = high)
+    ribbon_embed: float = 0.6
     # text
     h_title: float = 7.8
     h_stat: float = 5.8
@@ -54,8 +60,32 @@ class TileConfig:
     color_route: tuple = (200, 40, 36, 255)
     color_frame: tuple = (28, 28, 30, 255)
     color_text: tuple = (244, 243, 239, 255)
+    color_decoration: tuple = (236, 232, 222, 255)
     # labels: list of dicts {slot, content, size, rot, font, embolden}
     labels: list = field(default_factory=list)
+    # decorations: place-names etc. placed on the terrain at lon/lat (from AMap).
+    # each {text, lat, lon, size?, dx?, dy?, font?, embolden?}
+    decorations: list = field(default_factory=list)
+    decoration_h: float = 3.4
+    decoration_raise: float = 0.7
+    decoration_embed: float = 0.4
+    # base style: "relief" (DEM terrain) | "flat" (map plate, for flat rides)
+    terrain_style: str = "relief"
+    color_base: tuple = (30, 42, 68, 255)        # flat-base / map colour
+    # roads (map style) — OSM major roads raised on the base
+    roads_enabled: bool = False
+    road_classes: list = field(default_factory=lambda: ["motorway", "trunk", "primary"])
+    road_raise: float = 0.7
+    road_w_mm: float = 1.0                        # width of the top class; scaled by class
+    road_res: float = 0.2                         # raster resolution (mm/px)
+    road_corridor_km: float = 0.0                 # >0: keep only roads within this of route
+    color_roads: tuple = (232, 228, 212, 255)
+    # icons: each {type, lat, lon, size?, height?, dx?, dy?, angle?}
+    # types: dot ring star diamond triangle flag bar building tower skyline
+    icons: list = field(default_factory=list)
+    color_icon: tuple = (242, 167, 58, 255)
+    icon_size: float = 4.0
+    icon_height: float = 2.4
     # misc
     utc_offset_hours: int = None
 
@@ -92,13 +122,16 @@ def merge(*dicts):
     return out
 
 
-# default stat priority for auto-filling slots
+# stat priority for auto-filling slots — running/hiking vs cycling (speed, not pace)
 STAT_PRIORITY = ["{distance}", "{ascent_arrow}", "{duration}", "{hr_heart}",
                  "{pace}", "{kcal}", "{descent}"]
+CYCLING_PRIORITY = ["{distance}", "{speed_kmh}", "{duration}", "{hr_heart}",
+                    "{kcal}", "{ascent_arrow}"]
 
 
-def auto_labels(shape, across, frame_width, fmt, title):
-    """Build a sensible default label set for whatever slots the shape exposes."""
+def auto_labels(shape, across, frame_width, fmt, title, sport=""):
+    """Build a sensible default label set for whatever slots the shape exposes.
+    Cycling activities prioritise avg speed over pace."""
     slots = shape.slots(across, frame_width)
     named = [k for k in slots if not k.startswith("s")]
     used, out = set(), []
@@ -117,7 +150,9 @@ def auto_labels(shape, across, frame_width, fmt, title):
     rest = [k for k in named if k not in used]
     rest.sort(key=lambda k: (round(math.sin(math.radians(slots[k].anchor_deg)), 3),
                              round(math.cos(math.radians(slots[k].anchor_deg)), 3)))
-    contents = [c for c in STAT_PRIORITY if fmt.get(c.strip("{}"), "") != ""]
+    is_cycling = any(w in (sport or "").lower() for w in ["cycl", "bike", "骑"])
+    prio = CYCLING_PRIORITY if is_cycling else STAT_PRIORITY
+    contents = [c for c in prio if fmt.get(c.strip("{}"), "") != ""]
     for slot, content in zip(rest, contents):
         take(slot, content, "stat")
     return out

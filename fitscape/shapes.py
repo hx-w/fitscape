@@ -39,10 +39,8 @@ class Slot:
 
 
 class Shape:
-    aspect = 1.0
     def outer_contour(self, across): ...
     def inner_across(self, across, fw): return across - 2 * fw
-    def cross_section_contour(self, across): return self.outer_contour(across)
     def prism(self, across, height, z0=0.0):
         return geom.prism(self.outer_contour(across), height, z0)
     def chamfered_prism(self, across, height, chamfer):
@@ -57,16 +55,11 @@ class RegularPolygon(Shape):
     def __init__(self, n, rotation_deg=0.0):
         self.n = n
         self.rot = rotation_deg
-        self.aspect = self._bbox_aspect()
 
     def _verts(self, across):
         R = across / 2.0
         a = np.radians(self.rot + np.arange(self.n) * 360.0 / self.n)
         return np.column_stack([R * np.cos(a), R * np.sin(a)])
-
-    def _bbox_aspect(self):
-        v = self._verts(2.0)
-        return (v[:, 0].max() - v[:, 0].min()) / (v[:, 1].max() - v[:, 1].min())
 
     def outer_contour(self, across):
         return self._verts(across)
@@ -142,7 +135,6 @@ def _welzl(points):
 
 
 class Circle(Shape):
-    aspect = 1.0
     SEG = 256
     # default rim slots
     DEFAULT_SLOTS = ["top", "ur", "right", "lr", "bottom", "ll", "left", "ul"]

@@ -34,30 +34,50 @@ def build_tile(fit_path, cfg, out_dir, renders=True, verbose=True):
     shape = SH.make_shape(cfg.shape)
     proj = Projector(act, shape, cfg)
 
-    # DEM over the inner-footprint extent (+ margin) so corners are covered
-    bb = _geo_bbox(proj, shape, proj.inner_across, cfg.dem_margin)
-    elev, meta = DEM.fetch(*bb, zoom=cfg.dem_zoom, cache=CACHE)
-    elev = DEM.clean(elev, cfg.dem_smooth_px)
-    sampler = DEM.sampler(elev, meta)
+    if cfg.terrain_style == "flat":
+        terr_man, info = B.build_base_flat(act, shape, cfg, proj)
+        base_color = cfg.color_base
+    else:
+        bb = _geo_bbox(proj, shape, proj.inner_across, cfg.dem_margin)
+        elev, meta = DEM.fetch(*bb, zoom=cfg.dem_zoom, cache=CACHE)
+        elev = DEM.clean(elev, cfg.dem_smooth_px)
+        sampler = DEM.sampler(elev, meta)
+        terr_man, info = B.build_terrain(act, shape, cfg, proj, sampler)
+        base_color = cfg.color_terrain
 
-    terr_man, info = B.build_terrain(act, shape, cfg, proj, sampler)
     route_man, rstats = B.build_route(act, shape, cfg, proj, info)
     frame_man, finfo = B.build_frame(shape, cfg, info)
+    roads_man = B.build_roads(act, shape, cfg, proj, info)
+    icons_man = B.build_icons(act, shape, cfg, proj, info)
     if not cfg.labels:
-        cfg.labels = CFG.auto_labels(shape, cfg.across_mm, cfg.frame_width, act.fmt, cfg.title)
+        cfg.labels = CFG.auto_labels(shape, cfg.across_mm, cfg.frame_width, act.fmt,
+                                     cfg.title, act.sport_name)
     labels_man = B.build_labels(act, shape, cfg, finfo)
+    places_man = B.build_decorations(act, shape, cfg, proj, info)
 
-    # carve route + frame out of terrain -> non-overlapping bodies (clean colours)
-    terrain = geom.to_trimesh(terr_man - route_man - frame_man, cfg.color_terrain)
+    # route sits on top of roads (a ride follows the network) -> carve roads under it
+    if roads_man is not None:
+        roads_man = roads_man - route_man
+    # carve everything that embeds into the base -> non-overlapping coloured bodies
+    carve = terr_man - route_man - frame_man
+    for sub in (places_man, icons_man, roads_man):
+        if sub is not None:
+            carve = carve - sub
+    terrain = geom.to_trimesh(carve, base_color)
     route = geom.to_trimesh(route_man, cfg.color_route)
     frame = geom.to_trimesh(frame_man, cfg.color_frame)
     labels = geom.to_trimesh(labels_man, cfg.color_text) if labels_man else None
+    places = geom.to_trimesh(places_man, cfg.color_decoration) if places_man else None
+    roads = geom.to_trimesh(roads_man, cfg.color_roads) if roads_man else None
+    icons = geom.to_trimesh(icons_man, cfg.color_icon) if icons_man else None
 
     bodies = {"frame": frame, "terrain": terrain, "route": route}
-    if labels is not None:
-        bodies["labels"] = labels
-    colors = {"frame": cfg.color_frame, "terrain": cfg.color_terrain,
-              "route": cfg.color_route, "labels": cfg.color_text}
+    for nm, bd in [("roads", roads), ("labels", labels), ("places", places), ("icons", icons)]:
+        if bd is not None:
+            bodies[nm] = bd
+    colors = {"frame": cfg.color_frame, "terrain": base_color, "route": cfg.color_route,
+              "labels": cfg.color_text, "places": cfg.color_decoration,
+              "roads": cfg.color_roads, "icons": cfg.color_icon}
 
     if verbose:
         for n, tm in bodies.items():
@@ -88,11 +108,13 @@ def build_tile(fit_path, cfg, out_dir, renders=True, verbose=True):
                    allow_unicode=True, sort_keys=False)
 
     rpaths = []
+    flat_shade = {"terrain", "roads", "frame"} if cfg.terrain_style == "flat" else set()
     if renders:
         for v in ["top", "iso", "iso2", "low"]:
             z = 1.05 if v == "top" else (1.5 if v == "low" else 1.18)
             sz = (1500, 950) if v == "low" else (1400, 1240)
-            rpaths.append(R.render(bodies, colors, v, f"{out_dir}/renders/{v}.png", size=sz, zoom=z))
+            rpaths.append(R.render(bodies, colors, v, f"{out_dir}/renders/{v}.png", size=sz,
+                                   zoom=z, flat_shade=flat_shade))
         R.contact_sheet([f"{out_dir}/renders/top.png", f"{out_dir}/renders/iso.png",
                          f"{out_dir}/renders/iso2.png", f"{out_dir}/renders/low.png"],
                         f"{out_dir}/renders/contact.png")

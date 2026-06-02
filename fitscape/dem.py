@@ -50,7 +50,7 @@ def choose_zoom(lon_min, lat_min, lon_max, lat_max, max_zoom=14, max_px=2304):
     return (6, *_tile_range(lon_min, lat_min, lon_max, lat_max, 6))
 
 
-def fetch(lon_min, lat_min, lon_max, lat_max, zoom=14, cache="build/tiles", max_px=2304):
+def fetch(lon_min, lat_min, lon_max, lat_max, zoom=14, cache=".demcache", max_px=2304):
     """Fetch terrarium tiles, auto-stepping zoom down so the mosaic stays <= max_px."""
     os.makedirs(cache, exist_ok=True)
     zoom, tx0, tx1, ty0, ty1 = choose_zoom(lon_min, lat_min, lon_max, lat_max, zoom, max_px)

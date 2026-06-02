@@ -1,0 +1,12 @@
+# Flat-ride style: route becomes a vertical "speed ribbon" (wall whose height
+# encodes speed). The terrain is kept near-flat so the ribbon is the star.
+shape: hexagon
+route_style: ribbon
+ribbon_metric: speed      # tall = fast; try "hr" for effort, "elevation" for hilly
+ribbon_thick: 1.9
+ribbon_h_min: 1.6
+ribbon_h_max: 14.0
+ribbon_embed: 0.6
+base_h: 3.5
+exaggeration: 1.8         # near-flat clean base (route carries the 3D drama)
+frame_rim_margin: 2.4     # low frame; the ribbon rises above it as a sculpture

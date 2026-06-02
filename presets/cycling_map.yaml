@@ -1,0 +1,26 @@
+# Flat ride -> an elegant "city map" plate: thin crisp OSM roads on a deep-navy
+# base (blueprint feel), route as a red speed-ribbon, gold icons, cream labels.
+shape: hexagon
+terrain_style: flat
+roads_enabled: true
+road_classes: [motorway, trunk, primary]
+road_w_mm: 0.55          # thin, crisp lines (not fat worms)
+road_raise: 0.45
+road_res: 0.15           # fine raster for crisp edges
+road_corridor_km: 0.0    # full network = detailed city map
+route_style: ribbon
+ribbon_metric: speed
+ribbon_thick: 1.8
+ribbon_h_min: 1.5
+ribbon_h_max: 11.5
+ribbon_embed: 0.6
+base_h: 3.5
+frame_rim_margin: 3.0
+# refined palette: deep navy base, soft cream roads, warm red route, gold icons
+color_base: [22, 33, 54, 255]
+color_frame: [13, 21, 37, 255]
+color_roads: [214, 206, 184, 255]
+color_route: [212, 66, 54, 255]
+color_text: [236, 230, 216, 255]
+color_decoration: [236, 230, 216, 255]
+color_icon: [240, 176, 70, 255]

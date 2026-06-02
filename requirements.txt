@@ -12,6 +12,9 @@ manifold3d
 # text glyphs -> 2D contours
 matplotlib
 
+# map mode: rasterise OSM roads -> contours
+scikit-image
+
 # rendering / image ops
 pyvista
 pillow

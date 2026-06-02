@@ -2,7 +2,6 @@
 """Offscreen preview renders with a raking key light (relief reads like hillshade)."""
 import numpy as np
 import pyvista as pv
-import trimesh
 from PIL import Image
 pv.OFF_SCREEN = True
 
@@ -16,6 +15,9 @@ MAT = {  # name -> (specular, spec_power, ambient, diffuse)
     "terrain": (0.18, 12, 0.30, 1.00),
     "route":   (0.55, 28, 0.30, 0.95),
     "labels":  (0.25, 14, 0.45, 0.90),
+    "places":  (0.25, 14, 0.45, 0.90),
+    "roads":   (0.12, 10, 0.42, 0.95),
+    "icons":   (0.55, 26, 0.32, 0.95),
 }
 
 
@@ -26,8 +28,10 @@ def _lights(p, ctr, span, key):
     p.add_light(pv.Light(position=tuple(ctr + np.array([0, 1.6, 0.9])*span), color="#ffffff", intensity=0.3))
 
 
-def render(bodies, colors, view, out, size=(1400, 1240), zoom=1.0, bg="#eef0f3"):
-    """bodies: {name: trimesh}; colors: {name: rgba}."""
+def render(bodies, colors, view, out, size=(1400, 1240), zoom=1.0, bg="#eef0f3",
+           flat_shade=()):
+    """bodies: {name: trimesh}; colors: {name: rgba}. flat_shade: body names to
+    render with flat (faceted) shading instead of smooth (fixes flat-base streaks)."""
     p = pv.Plotter(off_screen=True, window_size=size, lighting="none")
     p.set_background(bg)
     allb = []
@@ -35,7 +39,7 @@ def render(bodies, colors, view, out, size=(1400, 1240), zoom=1.0, bg="#eef0f3")
         if tm is None:
             continue
         spec, sp, amb, dif = MAT.get(name, (0.2, 15, 0.3, 0.9))
-        p.add_mesh(pv.wrap(tm), color=_hex(colors[name]), smooth_shading=True,
+        p.add_mesh(pv.wrap(tm), color=_hex(colors[name]), smooth_shading=(name not in flat_shade),
                    specular=spec, specular_power=sp, ambient=amb, diffuse=dif)
         allb.append(tm.bounds)
     p.enable_anti_aliasing("ssaa")
