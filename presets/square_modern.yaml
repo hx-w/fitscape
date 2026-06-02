@@ -1,0 +1,4 @@
+# Clean modern square tile.
+shape: square
+frame_width: 12.0
+h_title: 8.5

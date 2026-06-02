@@ -1,0 +1,17 @@
+# core
+fitdecode      # parse Garmin .fit
+numpy
+scipy
+requests       # fetch DEM tiles
+pyyaml          # presets / configs
+
+# geometry (watertight, exact booleans)
+trimesh
+manifold3d
+
+# text glyphs -> 2D contours
+matplotlib
+
+# rendering / image ops
+pyvista
+pillow
